@@ -1,0 +1,32 @@
+apply plugin: 'war'
+apply plugin: 'osgi'
+apply plugin: 'eclipse'
+
+sourceCompatibility = '1.6'
+version = '1.0'
+
+repositories {
+	maven {
+        url "http://repo.dotcms.com/artifactory/libs-release"
+    }
+}
+
+dependencies {
+	compile (group: 'com.dotcms', name: 'dotcms', version: '2.5.1'){
+		transitive = true
+	}
+	providedCompile "javax.servlet:servlet-api:2.5"
+	compile fileTree(dir: 'src/main/resources/lib', include: '*.jar')
+}
+
+jar {
+    manifest {
+        name = 'Aquent PostTool'
+        symbolicName = 'com.aquent.plugins.posttool'
+        instruction 'Bundle-Vendor', 'Aquent, LLC (cfalzone@aquent.com)'
+        instruction 'Bundle-Description', 'Aquent PostTool Plugin'
+        instruction 'Bundle-DocURL', 'http://www.aquent.com'
+        instruction 'Bundle-Activator', 'com.aquent.viewtools.PostToolActivator'
+        instruction 'Import-Package', '!org.springframework.*', '*;version=0'
+    }
+}
