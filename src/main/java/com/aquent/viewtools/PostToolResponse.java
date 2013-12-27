@@ -25,8 +25,8 @@ public class PostToolResponse {
 		this.responseCode = rc;
 	}
 	
-	public String getReponse() { return this.response; }
-	public int getRepsponseCode() { return this.responseCode; }
+	public String getResponse() { return this.response; }
+	public int getResponseCode() { return this.responseCode; }
 	
 	public void setResponse(String r) { this.response = r; }
 	public void setResponseCode(int rc) { this.responseCode = rc; }
