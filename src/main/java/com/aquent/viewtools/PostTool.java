@@ -1,25 +1,16 @@
 package com.aquent.viewtools;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.List;
+import java.net.URLDecoder;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpVersion;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.util.ParameterParser;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.velocity.tools.view.tools.ViewTool;
-import org.omg.DynamicAny.NameValuePairSeqHelper;
-
 import com.dotmarketing.util.Logger;
 
 /**
@@ -32,9 +23,7 @@ import com.dotmarketing.util.Logger;
 public class PostTool implements ViewTool {
 
 	private boolean inited = false;
-	
-	private final String USER_AGENT = "Mozilla/5.0";
-	
+		
 	/**
 	 * Sets up the viewtool.  This viewtool should be application scoped.
 	 */
@@ -49,50 +38,49 @@ public class PostTool implements ViewTool {
 	}
 	
 	/**
-	 * Send a Post request and returns a PostToolReponse Object
+	 * Sends a request to a url
 	 * 
-	 * @param url		The url to post to
-	 * @param params	A Map of the parameters
-	 * @return			The PostToolResponse Object 
+	 * @param url - The URL
+	 * @param params - The Query String
+	 * @param method - The Method (POST or GET)
+	 * @return A PostToolResponse Object
 	 * @throws Exception
 	 */
-	public PostToolResponse sendPost(String url, Map<String, String> params) throws Exception {
-		StringBuilder bob = new StringBuilder();
-		for(String key : params.keySet()) {
-			bob.append(key+"="+params.get(key)+"&");
-		}
+	public PostToolResponse send(String url, Map<String, String> params, String method) throws Exception {
 		
-		String p = bob.toString();
-		p = p.substring(0, p.length() - 1);
+		Logger.debug(this, "send(String) called with url="+url+", params="+params+", and method="+method);
 		
-		return sendPost(url, p);
-	}
-	
-	/**
-	 * Send a Post request and returns a PostToolReponse Object
-	 * 
-	 * @param url		The url to post to
-	 * @param params	A string of the params (do not start with ?)
-	 * @return			The PostToolResponse
-	 * @throws Exception
-	 */
-	public PostToolResponse sendPost(String url, String params) throws Exception {
 		if(inited) {
 			
-			PostMethod method = null;
+			NameValuePair[] query;
+			if(params.size() > 0) query = new NameValuePair[params.size()];
+			else query = null;
+			
+			int i = 0;
+			for(String key : params.keySet()) {
+				query[i] = new NameValuePair(key, params.get(key));
+				i++;
+			}
+			HttpMethod m = null;
 			
 	        try {
 	            HttpClient client = new HttpClient();
-	            method = new PostMethod(url);
-	            method.setQueryString(params);
-	            client.executeMethod(method);
-	            return new PostToolResponse(method.getStatusCode(), method.getResponseBodyAsString());
+	            client.getParams().setParameter("http.protocol.version", HttpVersion.HTTP_1_1);
+				client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
+				
+				if(method.equalsIgnoreCase("POST")) m = new PostMethod(url);
+				else m = new GetMethod(url);
+				
+	            if(query != null && query.length > 0) m.setQueryString(query);
+	            
+	            client.executeMethod(m);
+	            return new PostToolResponse(m.getStatusCode(), m.getResponseBodyAsString());
 	        } catch (Exception e) {
 	            Logger.error(this, "Exception posting to url: "+url, e);
 	            return new PostToolResponse(888, null);
 	        } finally {
 	            if(method != null) {
-	                method.releaseConnection();
+	                m.releaseConnection();
 	            }
 	        }
 	        
@@ -102,53 +90,142 @@ public class PostTool implements ViewTool {
 	}
 	
 	/**
-	 * Makes a get request to a url
+	 * Sends a request to a url
 	 * 
-	 * @param url		The url
-	 * @param params	A Map of the parameters
-	 * @return			A PostToolResponse Object
+	 * @param url - The URL
+	 * @param params - The Query String
+	 * @param method - The Method (POST or GET)
+	 * @return A PostToolResponse Object
 	 * @throws Exception
 	 */
-	public PostToolResponse sendGet(String url, Map<String, String> params) throws Exception {
-		StringBuilder bob = new StringBuilder();
-		for(String key : params.keySet()) {
-			bob.append(key+"="+params.get(key)+"&");
-		}
+	public PostToolResponse send(String url, String params, String method) throws Exception {
 		
-		String p = bob.toString();
-		p = p.substring(0, p.length() - 1);
-		
-		return sendGet(url+"?"+p);
+		Logger.debug(this, "send(String) called with url="+url+", params="+params+", and method="+method);
+				
+		Map<String, String> queryPairs = new LinkedHashMap<String, String>();
+	    String[] pairs = params.split("&");
+	    for (String pair : pairs) {
+	        int idx = pair.indexOf("=");
+	        queryPairs.put(
+	        		URLDecoder.decode(pair.substring(0, idx), "UTF-8"), 
+	        		URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+	    }
+	    
+	    return send(url, queryPairs, method);
+	
 	}
 	
 	/**
-	 * Makes a get request to a url
+	 * Sends a get request to a url
 	 * 
-	 * @param url		The url
-	 * @return			A PostToolReponse Object
+	 * @param url - The URL
+	 * @param params - The Query String
+	 * @return A PostToolResponse Object
+	 * @throws Exception
+	 */
+	public PostToolResponse send(String url, String params) throws Exception {
+		return send(url, params, "GET");
+	}
+	
+	/**
+	 * Sends a get request to a url
+	 * 
+	 * @param url - The URL
+	 * @return A PostToolResponse Object
+	 * @throws Exception
+	 */
+	public PostToolResponse send(String url) throws Exception {
+		String params = "";
+		if(url.contains("?")) {
+			int idx = url.indexOf("?");
+			params = url.substring(idx + 1);
+			url = url.substring(0, idx);
+		}
+		return send(url, params, "GET");
+	}
+	
+	
+	
+	/**
+	 * Sends a get request to a url
+	 * 
+	 * @param url - The URL
+	 * @param params - The Query String
+	 * @return A PostToolResponse Object
+	 * @throws Exception
+	 */
+	public PostToolResponse sendGet(String url, String params) throws Exception {
+		return send(url, params, "GET");
+	}
+	
+	/**
+	 * Sends a get request to a url
+	 * 
+	 * @param url - The URL
+	 * @return A PostToolResponse Object
 	 * @throws Exception
 	 */
 	public PostToolResponse sendGet(String url) throws Exception {
-		if(inited) {
-			GetMethod method = null;
-	        
-	        try {
-	            HttpClient client = new HttpClient();
-	            method = new GetMethod(url);
-	            client.executeMethod(method);
-	            return new PostToolResponse(method.getStatusCode(), method.getResponseBodyAsString());
-	        } catch (Exception e) {
-	            Logger.error(this, "Exception getting url: "+url, e);
-	            return new PostToolResponse(888, null);
-	        } finally {
-	            if(method != null) {
-	                method.releaseConnection();
-	            }
-	        }
-	 
+		String params = "";
+		if(url.contains("?")) {
+			int idx = url.indexOf("?");
+			params = url.substring(idx + 1);
+			url = url.substring(0, idx);
 		}
-		
-		return new PostToolResponse(999, null);
+		return send(url, params, "GET");
+	}
+	
+	/**
+	 * Sends a get request to a url
+	 * 
+	 * @param url - The URL
+	 * @param params - The Query String
+	 * @return A PostToolResponse Object
+	 * @throws Exception
+	 */
+	public PostToolResponse sendGet(String url, Map<String, String> params) throws Exception {
+		return send(url, params, "GET");
+	}
+	
+	/**
+	 * Sends a post request to a url
+	 * 
+	 * @param url - The URL
+	 * @param params - The Query String
+	 * @return A PostToolResponse Object
+	 * @throws Exception
+	 */
+	public PostToolResponse sendPost(String url, String params) throws Exception {
+		return send(url, params, "POST");
+	}
+	
+	/**
+	 * Sends a post request to a url
+	 * 
+	 * @param url - The URL
+	 * @return A PostToolResponse Object
+	 * @throws Exception
+	 */
+	public PostToolResponse sendPost(String url) throws Exception {
+		String params = "";
+		if(url.contains("?")) {
+			int idx = url.indexOf("?");
+			params = url.substring(idx + 1);
+			url = url.substring(0, idx);
+		}
+		return send(url, params, "POST");
+	}
+	
+	/**
+	 * Sends a post request to a url
+	 * 
+	 * @param url - The URL
+	 * @param params - The Query String
+	 * @return A PostToolResponse Object
+	 * @throws Exception
+	 */
+	public PostToolResponse sendPost(String url, Map<String, String> params) throws Exception {
+		return send(url, params, "POST");
 	}
 
 }
