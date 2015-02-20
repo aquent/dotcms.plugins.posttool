@@ -10,6 +10,10 @@ import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.protocol.HttpContext;
 import org.apache.velocity.tools.view.tools.ViewTool;
 import com.dotmarketing.util.Logger;
 
@@ -65,11 +69,16 @@ public class PostTool implements ViewTool {
 			
 	        try {
 	            HttpClient client = new HttpClient();
+	            
+	            // Encoding for UTF-8
 	            client.getParams().setParameter("http.protocol.version", HttpVersion.HTTP_1_1);
 				client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
 				
 				if(method.equalsIgnoreCase("POST")) m = new PostMethod(url);
 				else m = new GetMethod(url);
+				
+				// Make sure we follow redirects
+				m.getParams().setParameter("http.protocol.handle-redirects",true);
 				
 	            if(query != null && query.length > 0) m.setQueryString(query);
 	            

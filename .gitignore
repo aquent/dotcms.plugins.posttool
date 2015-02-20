@@ -1,0 +1,9 @@
+/build/classes/
+/generated/
+/bin/
+.classpath
+.gradle/
+.project
+.settings/
+build/resources/
+build/tmp/
