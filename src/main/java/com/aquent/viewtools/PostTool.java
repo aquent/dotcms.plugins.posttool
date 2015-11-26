@@ -108,14 +108,15 @@ public class PostTool implements ViewTool {
 		Logger.debug(this, "send(String) called with url="+url+", params="+params+", and method="+method);
 				
 		Map<String, String> queryPairs = new LinkedHashMap<String, String>();
-	    String[] pairs = params.split("&");
-	    for (String pair : pairs) {
-	        int idx = pair.indexOf("=");
-	        queryPairs.put(
-	        		URLDecoder.decode(pair.substring(0, idx), "UTF-8"), 
-	        		URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
-	    }
-	    
+		if(params.length() > 0) {
+		    String[] pairs = params.split("&");
+		    for (String pair : pairs) {
+		        int idx = pair.indexOf("=");
+		        queryPairs.put(
+		        		URLDecoder.decode(pair.substring(0, idx), "UTF-8"), 
+		        		URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+		    }
+		}
 	    return send(url, queryPairs, method);
 	
 	}
