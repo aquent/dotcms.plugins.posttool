@@ -10,10 +10,6 @@ import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.protocol.HttpContext;
 import org.apache.velocity.tools.view.tools.ViewTool;
 import com.dotmarketing.util.Logger;
 
@@ -112,14 +108,15 @@ public class PostTool implements ViewTool {
 		Logger.debug(this, "send(String) called with url="+url+", params="+params+", and method="+method);
 				
 		Map<String, String> queryPairs = new LinkedHashMap<String, String>();
-	    String[] pairs = params.split("&");
-	    for (String pair : pairs) {
-	        int idx = pair.indexOf("=");
-	        queryPairs.put(
-	        		URLDecoder.decode(pair.substring(0, idx), "UTF-8"), 
-	        		URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
-	    }
-	    
+		if(params.length() > 0) {
+		    String[] pairs = params.split("&");
+		    for (String pair : pairs) {
+		        int idx = pair.indexOf("=");
+		        queryPairs.put(
+		        		URLDecoder.decode(pair.substring(0, idx), "UTF-8"), 
+		        		URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+		    }
+		}
 	    return send(url, queryPairs, method);
 	
 	}
