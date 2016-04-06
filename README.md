@@ -1,6 +1,13 @@
 Post Viewtool
 =================================================
-A plugin for dotCMS that adds a viewtool that allows the front-end developer to make simple post requests like curl
+A plugin for dotCMS that adds a viewtool that allows the front-end developer to make simple post requests like curl.
+The plugin now supports The following HTTP Method Types:
+* POST
+* PUT
+* GET
+* HEAD
+* DELETE
+You can also pass a content-type to the methods to control what content type is used for the request.
 
 Installation
 -----
@@ -9,7 +16,8 @@ Installation
 
 Compatibility
 -----
-Known to work with 2.5.1. Should be fully 2.3+ compatible though.
+DotCMS 3.1+
+For 2.3x compatibility see releases.
 
 Usage
 -----

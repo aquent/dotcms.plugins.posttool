@@ -27,6 +27,8 @@ public class PostTool implements ViewTool {
 
     private boolean inited = false;
 
+    private static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
+
     public static final int ERR_CODE_UNKNOWN_ERR = 888;
     public static final int ERR_CODE_NOT_INTED = 999;
     public static final int ERR_CODE_UNIMPLEMENTED_METHOD = 777;
@@ -55,10 +57,11 @@ public class PostTool implements ViewTool {
      *
      * @param url - The URL
      * @param params - The Query String
-     * @param method - The Method (POST or GET)
+     * @param method - The Method (POST/GET/PUT/HEAD/DELETE)
+     * @param contentType - The content type for this request
      * @return A PostToolResponse Object
      */
-    public PostToolResponse send(String url, Map<String, String> params, String method) {
+    public PostToolResponse send(String url, Map<String, String> params, String method, String contentType) {
 
         Logger.debug(this, "send(String) called with url=" + url + ", params=" + params + ", and method=" + method);
 
@@ -103,6 +106,9 @@ public class PostTool implements ViewTool {
                 // Make sure we follow redirects
                 m.getParams().setParameter("http.protocol.handle-redirects", true);
 
+                // Set Content Type
+                m.addRequestHeader("ContentType", contentType);
+
                 if (query != null && query.length > 0) {
                     m.setQueryString(query);
                 }
@@ -128,11 +134,12 @@ public class PostTool implements ViewTool {
      *
      * @param url - The URL
      * @param params - The Query String
-     * @param method - The Method (POST or GET)
+     * @param method - The Method (POST/GET/PUT/HEAD/DELETE)
+     * @param contentType - The content type for this request
      * @return A PostToolResponse Object
      * @throws Exception from URLDecoder.decode
      */
-    public PostToolResponse send(String url, String params, String method) throws Exception {
+    public PostToolResponse send(String url, String params, String method, String contentType) throws Exception {
         Logger.debug(this, "send(String) called with url=" + url + ", params=" + params + ", and method=" + method);
 
         Map<String, String> queryPairs = new LinkedHashMap<String, String>();
@@ -145,7 +152,43 @@ public class PostTool implements ViewTool {
                                URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
             }
         }
-        return send(url, queryPairs, method);
+        return send(url, queryPairs, method, contentType);
+    }
+
+    /**
+     * Sends a request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @param method - The Method (POST/GET/PUT/HEAD/DELETE)
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse send(String url, Map<String, String> params, String method) {
+        return send(url, params, method, DEFAULT_CONTENT_TYPE);
+    }
+
+    /**
+     * Sends a request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @param method - The Method (POST/GET/PUT/HEAD/DELETE)
+     * @return A PostToolResponse Object
+     * @throws Exception from send
+     */
+    public PostToolResponse send(String url, String params, String method) throws Exception {
+        return send(url, params, method, DEFAULT_CONTENT_TYPE);
+    }
+
+    /**
+     * Sends a get request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse send(String url, Map<String, String> params) {
+        return send(url, params, METHOD_GET, DEFAULT_CONTENT_TYPE);
     }
 
     /**
@@ -157,7 +200,7 @@ public class PostTool implements ViewTool {
      * @throws Exception from send
      */
     public PostToolResponse send(String url, String params) throws Exception {
-        return send(url, params, METHOD_GET);
+        return send(url, params, METHOD_GET, DEFAULT_CONTENT_TYPE);
     }
 
     /**
@@ -174,7 +217,32 @@ public class PostTool implements ViewTool {
             params = url.substring(idx + 1);
             url = url.substring(0, idx);
         }
-        return send(url, params, METHOD_GET);
+        return send(url, params, METHOD_GET, DEFAULT_CONTENT_TYPE);
+    }
+
+    /**
+     * Sends a get request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @return A PostToolResponse Object
+     * @param contentType - The content type for this request
+     * @throws Exception from send
+     */
+    public PostToolResponse sendGet(String url, String params, String contentType) throws Exception {
+        return send(url, params, METHOD_GET, contentType);
+    }
+
+    /**
+     * Sends a get request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendGet(String url, Map<String, String> params, String contentType) {
+        return send(url, params, METHOD_GET, contentType);
     }
 
     /**
@@ -186,7 +254,18 @@ public class PostTool implements ViewTool {
      * @throws Exception from send
      */
     public PostToolResponse sendGet(String url, String params) throws Exception {
-        return send(url, params, METHOD_GET);
+        return send(url, params, METHOD_GET, DEFAULT_CONTENT_TYPE);
+    }
+
+    /**
+     * Sends a get request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendGet(String url, Map<String, String> params) {
+        return send(url, params, METHOD_GET, DEFAULT_CONTENT_TYPE);
     }
 
     /**
@@ -203,19 +282,32 @@ public class PostTool implements ViewTool {
             params = url.substring(idx + 1);
             url = url.substring(0, idx);
         }
-        return send(url, params, METHOD_GET);
+        return send(url, params, METHOD_GET, DEFAULT_CONTENT_TYPE);
     }
 
     /**
-     * Sends a get request to a url.
+     * Sends a post request to a url.
      *
      * @param url - The URL
      * @param params - The Query String
      * @return A PostToolResponse Object
+     * @param contentType - The content type for this request
      * @throws Exception from send
      */
-    public PostToolResponse sendGet(String url, Map<String, String> params) throws Exception {
-        return send(url, params, METHOD_GET);
+    public PostToolResponse sendPost(String url, String params, String contentType) throws Exception {
+        return send(url, params, METHOD_POST, contentType);
+    }
+
+    /**
+     * Sends a post request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendPost(String url, Map<String, String> params, String contentType) {
+        return send(url, params, METHOD_POST, contentType);
     }
 
     /**
@@ -265,9 +357,45 @@ public class PostTool implements ViewTool {
      * @param url - The URL
      * @param params - The Query String
      * @return A PostToolResponse Object
+     * @param contentType - The content type for this request
+     * @throws Exception from send
+     */
+    public PostToolResponse sendPut(String url, String params, String contentType) throws Exception {
+        return send(url, params, METHOD_PUT, contentType);
+    }
+
+    /**
+     * Sends a put request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendPut(String url, Map<String, String> params, String contentType) {
+        return send(url, params, METHOD_PUT, contentType);
+    }
+
+    /**
+     * Sends a put request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @return A PostToolResponse Object
      * @throws Exception from send
      */
     public PostToolResponse sendPut(String url, String params) throws Exception {
+        return send(url, params, METHOD_PUT);
+    }
+
+    /**
+     * Sends a put request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendPut(String url, Map<String, String> params) {
         return send(url, params, METHOD_PUT);
     }
 
@@ -289,15 +417,28 @@ public class PostTool implements ViewTool {
     }
 
     /**
-     * Sends a put request to a url.
+     * Sends a head request to a url.
      *
      * @param url - The URL
      * @param params - The Query String
      * @return A PostToolResponse Object
+     * @param contentType - The content type for this request
      * @throws Exception from send
      */
-    public PostToolResponse sendPut(String url, Map<String, String> params) throws Exception {
-        return send(url, params, METHOD_PUT);
+    public PostToolResponse sendHead(String url, String params, String contentType) throws Exception {
+        return send(url, params, METHOD_HEAD, contentType);
+    }
+
+    /**
+     * Sends a head request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendHead(String url, Map<String, String> params, String contentType) {
+        return send(url, params, METHOD_HEAD, contentType);
     }
 
     /**
@@ -309,6 +450,17 @@ public class PostTool implements ViewTool {
      * @throws Exception from send
      */
     public PostToolResponse sendHead(String url, String params) throws Exception {
+        return send(url, params, METHOD_HEAD);
+    }
+
+    /**
+     * Sends a head request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendHead(String url, Map<String, String> params) {
         return send(url, params, METHOD_HEAD);
     }
 
@@ -330,15 +482,28 @@ public class PostTool implements ViewTool {
     }
 
     /**
-     * Sends a head request to a url.
+     * Sends a delete request to a url.
      *
      * @param url - The URL
      * @param params - The Query String
      * @return A PostToolResponse Object
+     * @param contentType - The content type for this request
      * @throws Exception from send
      */
-    public PostToolResponse sendHead(String url, Map<String, String> params) throws Exception {
-        return send(url, params, METHOD_HEAD);
+    public PostToolResponse sendDelete(String url, String params, String contentType) throws Exception {
+        return send(url, params, METHOD_DELETE, contentType);
+    }
+
+    /**
+     * Sends a delete request to a url.
+     *
+     * @param url - The URL
+     * @param params - The Query String
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendDelete(String url, Map<String, String> params, String contentType) {
+        return send(url, params, METHOD_DELETE, contentType);
     }
 
     /**
@@ -357,6 +522,17 @@ public class PostTool implements ViewTool {
      * Sends a delete request to a url.
      *
      * @param url - The URL
+     * @param params - The Query String
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendDelete(String url, Map<String, String> params) {
+        return send(url, params, METHOD_DELETE);
+    }
+
+    /**
+     * Sends a delete request to a url.
+     *
+     * @param url - The URL
      * @return A PostToolResponse Object
      * @throws Exception from send
      */
@@ -367,18 +543,6 @@ public class PostTool implements ViewTool {
             params = url.substring(idx + 1);
             url = url.substring(0, idx);
         }
-        return send(url, params, METHOD_DELETE);
-    }
-
-    /**
-     * Sends a delete request to a url.
-     *
-     * @param url - The URL
-     * @param params - The Query String
-     * @return A PostToolResponse Object
-     * @throws Exception from send
-     */
-    public PostToolResponse sendDelete(String url, Map<String, String> params) throws Exception {
         return send(url, params, METHOD_DELETE);
     }
 }

@@ -1,6 +1,7 @@
 /build/classes/
 /generated/
 /bin/
+.checkstyle
 .classpath
 .gradle/
 .project
