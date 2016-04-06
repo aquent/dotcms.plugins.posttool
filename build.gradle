@@ -42,7 +42,7 @@ jar {
 			'!org.springframework.*', 
 			'!org.apache.commons.*',
 			'!javax.xml.*',
-			'javax.net.ssl',
+			'javax.net',
 			'*;version=0'
 		instruction 'Embed-Dependency', 'commons-httpclient', 'httpcore', 'log4j', 'xercesImpl', 'xml-apis'
 		instruction 'Embed-Transitive', 'true'
