@@ -107,7 +107,7 @@ public class PostTool implements ViewTool {
                 m.getParams().setParameter("http.protocol.handle-redirects", true);
 
                 // Set Content Type
-                m.addRequestHeader("ContentType", contentType);
+                m.addRequestHeader("Content-Type", contentType);
 
                 if (query != null && query.length > 0) {
                     m.setQueryString(query);
