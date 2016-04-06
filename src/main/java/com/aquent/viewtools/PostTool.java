@@ -13,6 +13,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.velocity.tools.view.tools.ViewTool;
 import com.dotmarketing.util.Logger;
 
@@ -53,6 +55,99 @@ public class PostTool implements ViewTool {
     }
 
     /**
+     * This is used to send a single string payload to a url.
+     * Can be used to send JSON or XML to a url.
+     * Only Supports POST and PUT methods.
+     *
+     * @param url - The URL
+     * @param data - The String Data
+     * @param method - The Method (POST/PUT)
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendStringData(String url, String data, String method, String contentType) {
+        Logger.debug(this, "sendStringData called with url=" + url + ", data=" + data + ", and method=" + method);
+
+        RequestEntity entity;
+        try {
+            entity = new StringRequestEntity(data, contentType, "UTF-8");
+        } catch (Exception e) {
+            Logger.error(this, "Exception creating RequestEntity for: " + url, e);
+            return new PostToolResponse(ERR_CODE_UNKNOWN_ERR, null);
+        }
+        if (inited) {
+            HttpClient client = new HttpClient();
+
+            // Encoding for UTF-8
+            client.getParams().setParameter("http.protocol.version", HttpVersion.HTTP_1_1);
+            client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
+
+            if (method.equalsIgnoreCase(METHOD_POST)) {
+                PostMethod m = new PostMethod(url);
+                m.setRequestEntity(entity);
+                m.getParams().setParameter("http.protocol.handle-redirects", true);
+                try {
+                    client.executeMethod(m);
+                    return new PostToolResponse(m.getStatusCode(), m.getResponseBodyAsString());
+                } catch (Exception e) {
+                    Logger.error(this, "Exception posting to url: " + url, e);
+                    return new PostToolResponse(ERR_CODE_UNKNOWN_ERR, null);
+                } finally {
+                    if (method != null) {
+                        m.releaseConnection();
+                    }
+                }
+            } else if (method.equalsIgnoreCase(METHOD_PUT)) {
+                PutMethod m = new PutMethod(url);
+                m.setRequestEntity(entity);
+                m.getParams().setParameter("http.protocol.handle-redirects", true);
+                try {
+                    client.executeMethod(m);
+                    return new PostToolResponse(m.getStatusCode(), m.getResponseBodyAsString());
+                } catch (Exception e) {
+                    Logger.error(this, "Exception posting to url: " + url, e);
+                    return new PostToolResponse(ERR_CODE_UNKNOWN_ERR, null);
+                } finally {
+                    if (method != null) {
+                        m.releaseConnection();
+                    }
+                }
+            } else {
+                Logger.error(this, "Unimplemented Method: " + method);
+                return new PostToolResponse(ERR_CODE_UNIMPLEMENTED_METHOD, null);
+            }
+        }
+        
+        return new PostToolResponse(ERR_CODE_NOT_INTED, null);
+    }
+    
+    /**
+     * This is used to send a single string payload to a url.
+     * Can be used to send JSON or XML to a url.
+     * Only supports PUT and POST Methods.
+     *
+     * @param url - The URL
+     * @param data - The String Data
+     * @param method - The Method (POST/PUT)
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendStringData(String url, String data, String method) {
+        return sendStringData(url, data, method, DEFAULT_CONTENT_TYPE);
+    }
+    
+    /**
+     * This is used to post a single string payload to a url.
+     * Can be used to send JSON or XML to a url.
+     *
+     * @param url - The URL
+     * @param data - The String Data
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse sendStringData(String url, String data) {
+        return sendStringData(url, data, METHOD_POST, DEFAULT_CONTENT_TYPE);
+    }
+
+    /**
      * Sends a request to a url.
      *
      * @param url - The URL
@@ -62,11 +157,9 @@ public class PostTool implements ViewTool {
      * @return A PostToolResponse Object
      */
     public PostToolResponse send(String url, Map<String, String> params, String method, String contentType) {
-
-        Logger.debug(this, "send(String) called with url=" + url + ", params=" + params + ", and method=" + method);
+        Logger.debug(this, "send(Map) called with url=" + url + ", params=" + params + ", and method=" + method);
 
         if (inited) {
-
             NameValuePair[] query;
             if (params.size() > 0) {
                 query = new NameValuePair[params.size()];
@@ -123,7 +216,6 @@ public class PostTool implements ViewTool {
                     m.releaseConnection();
                 }
             }
-
         }
 
         return new PostToolResponse(ERR_CODE_NOT_INTED, null);
@@ -286,6 +378,32 @@ public class PostTool implements ViewTool {
     }
 
     /**
+     * Post a Single String payload to a url.
+     * Used to send json or xml data.
+     *
+     * @param url - The URL
+     * @param data - The String Data
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse postStringData(String url, String data, String contentType) {
+        return sendStringData(url, data, METHOD_POST, contentType);
+    }
+
+    /**
+     * Post a Single String payload to a url.
+     * Used to send json or xml data.
+     *
+     * @param url - The URL
+     * @param data - The String Data
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse postStringData(String url, String data) {
+        return sendStringData(url, data, METHOD_POST);
+    }
+
+    /**
      * Sends a post request to a url.
      *
      * @param url - The URL
@@ -349,6 +467,32 @@ public class PostTool implements ViewTool {
      */
     public PostToolResponse sendPost(String url, Map<String, String> params) throws Exception {
         return send(url, params, METHOD_POST);
+    }
+
+    /**
+     * Put a Single String payload to a url.
+     * Used to send json or xml data.
+     *
+     * @param url - The URL
+     * @param data - The String Data
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse putStringData(String url, String data, String contentType) {
+        return sendStringData(url, data, METHOD_PUT, contentType);
+    }
+
+    /**
+     * Put a Single String payload to a url.
+     * Used to send json or xml data.
+     *
+     * @param url - The URL
+     * @param data - The String Data
+     * @param contentType - The content type for this request
+     * @return A PostToolResponse Object
+     */
+    public PostToolResponse putStringData(String url, String data) {
+        return sendStringData(url, data, METHOD_PUT);
     }
 
     /**
