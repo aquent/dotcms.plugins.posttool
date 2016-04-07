@@ -49,6 +49,16 @@ You got: <textarea>$resp3.getResponse()</textarea> </p>
 #set($resp4     = $post.postStringData("http://jsonplaceholder.typicode.com/posts", $jsonData, "application/json"))
 <p>Status:  $resp4.getResponseCode() <br />
 You got: <textarea>$resp4.getResponse()</textarea> </p>
+
+<h3>Test GET with Basic Auth:</h3>
+#set($authUrl   = "http://something.com/api/something")
+#set($creds     = $post.createCreds("username", 'password'))
+#set($resp5     = $post.send($authUrl))
+#set($resp6     = $post.send($authUrl, $creds))
+<p>Without Creds - Status:  $resp5.getResponseCode() <br />
+Without Creds - You got: <textarea>$resp5.getResponse()</textarea> </p>
+<p>With Creds - Status:  $resp6.getResponseCode() <br />
+With Creds - You got: <textarea>$resp6.getResponse()</textarea> </p>
 ```
 
 Building
