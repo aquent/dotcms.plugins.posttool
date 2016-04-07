@@ -21,6 +21,7 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.velocity.tools.view.tools.ViewTool;
 
 import com.dotmarketing.util.Logger;
+import com.dotmarketing.util.UtilMethods;
 
 /**
  *
@@ -83,7 +84,7 @@ public class PostTool implements ViewTool {
      */
     public PostToolResponse sendStringData(String url, String data, String method, String contentType, Credentials creds) {
         Logger.debug(this, "sendStringData called with url=" + url + ", data=" + data + ", and method=" + method
-                     + ", contentType = " + contentType + ", creds=" + creds);
+                     + ", contentType = " + contentType + ", creds=" + UtilMethods.isSet(creds));
 
         RequestEntity entity;
         try {
@@ -224,7 +225,7 @@ public class PostTool implements ViewTool {
      */
     public PostToolResponse send(String url, Map<String, String> params, String method, String contentType, Credentials creds) {
         Logger.debug(this, "send(Map) called with url=" + url + ", params=" + params + ", and method=" + method
-                     + ", contentType = " + contentType + ", creds=" + creds);
+                     + ", contentType = " + contentType + ", creds=" + UtilMethods.isSet(creds));
 
         if (inited) {
             NameValuePair[] query;
@@ -319,7 +320,7 @@ public class PostTool implements ViewTool {
      */
     public PostToolResponse send(String url, String params, String method, String contentType, Credentials creds) throws Exception {
         Logger.debug(this, "send(String) called with url=" + url + ", params=" + params + ", and method=" + method
-                     + ", contentType = " + contentType + ", creds=" + creds);
+                     + ", contentType = " + contentType + ", creds=" + UtilMethods.isSet(creds));
 
         Map<String, String> queryPairs = new LinkedHashMap<String, String>();
         if (params.length() > 0) {
