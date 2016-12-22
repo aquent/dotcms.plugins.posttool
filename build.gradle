@@ -4,7 +4,7 @@ apply plugin: 'propdeps'
 apply plugin: 'propdeps-maven'
 apply plugin: 'propdeps-eclipse'
 
-sourceCompatibility = '1.7'
+sourceCompatibility = '1.8'
 
 repositories {
 	mavenCentral()
@@ -12,12 +12,10 @@ repositories {
 }
 
 dependencies {
-	compile('com.dotcms:dotcms:3.2') { transitive = true }
-	compile('commons-httpclient:commons-httpclient:3.1')
-	compile('org.apache.httpcomponents:httpcore:4.4.1')
-	compile('log4j:log4j:1.2.17')
-	compile('xerces:xercesImpl:2.10.0') { transitive = false }
-	compile('xml-apis:xml-apis:1.4.01') { transitive = false }
+	compile('com.dotcms:dotcms:3.6.1') { transitive = true }
+	compile('commons-httpclient:commons-httpclient:3.1') {
+		exclude(module: 'commons-logging')
+	}
 	provided('javax.servlet:servlet-api:2.5')
 }
 
@@ -40,9 +38,8 @@ jar {
 		instruction 'Bundle-Activator', 'com.aquent.viewtools.PostToolActivator'
 		instruction 'Import-Package', 
 			'!org.springframework.*', 
-			'!org.apache.commons.*',
-			'!javax.xml.*',
-			'javax.net',
+			'!org.apache.commons.httpclient.*',
+			'org.apache.commons.logging',
 			'*;version=0'
 		instruction 'Embed-Dependency', 'commons-httpclient', 'httpcore', 'log4j', 'xercesImpl', 'xml-apis'
 		instruction 'Embed-Transitive', 'true'
@@ -54,21 +51,23 @@ jar {
  * and sets the "Bundle-ClassPath" instruction as well as copy instruction for
  * the related artifacts accordingly
  */
-task processEmbedded << {
-	ext.embedInstruction = jar.manifest.instructions.get("Embed-Dependency")
-	ext.transitive = jar.manifest.instructions.get("Embed-Transitive");
-	if(embedInstruction != null){
-		def includedArtifacts = [] as Set
-		getDependencies(embedInstruction,transitive).each { dependency ->
-			dependency.moduleArtifacts.each { artifact ->
-				includedArtifacts.add(artifact.file)
+task processEmbedded {
+	doLast {
+		ext.embedInstruction = jar.manifest.instructions.get("Embed-Dependency")
+		ext.transitive = jar.manifest.instructions.get("Embed-Transitive");
+		if(embedInstruction != null){
+			def includedArtifacts = [] as Set
+			getDependencies(embedInstruction,transitive).each { dependency ->
+				dependency.moduleArtifacts.each { artifact ->
+					includedArtifacts.add(artifact.file)
+				}
 			}
-		}
-		jar.manifest.instruction("Bundle-ClassPath",'.') //add the default classpath
-		includedArtifacts.each { artifact -> 
-			jar.from(artifact)
-			jar.manifest.instruction("Bundle-ClassPath",artifact.name)
-        }
+			jar.manifest.instruction("Bundle-ClassPath",'.') //add the default classpath
+			includedArtifacts.each { artifact -> 
+				jar.from(artifact)
+				jar.manifest.instruction("Bundle-ClassPath",artifact.name)
+	        }
+	    }
     }
 }
 
