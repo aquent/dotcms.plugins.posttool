@@ -3,30 +3,35 @@ package com.aquent.viewtools;
 import org.apache.velocity.tools.view.context.ViewContext;
 import org.apache.velocity.tools.view.servlet.ServletToolInfo;
 
+/**
+ * Viewtool info Class.
+ * @author cfalzone
+ *
+ */
 public class PostToolInfo extends ServletToolInfo {
 
     @Override
-    public String getKey () {
+    public String getKey() {
         return "post";
     }
 
     @Override
-    public String getScope () {
+    public String getScope() {
         return ViewContext.APPLICATION;
     }
 
     @Override
-    public String getClassname () {
+    public String getClassname() {
         return PostTool.class.getName();
     }
 
     @Override
-    public Object getInstance ( Object initData ) {
+    public Object getInstance(Object initData) {
 
         PostTool viewTool = new PostTool();
-        viewTool.init( initData );
+        viewTool.init(initData);
 
-        setScope( ViewContext.APPLICATION );
+        setScope(ViewContext.APPLICATION);
 
         return viewTool;
     }
