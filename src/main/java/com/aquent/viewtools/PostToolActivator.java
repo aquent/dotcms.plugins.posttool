@@ -15,7 +15,7 @@ public class PostToolActivator extends GenericBundleActivator {
 
         //Initializing services...
         initializeServices(bundleContext);
-        
+
         //Registering the ViewTool service
         registerViewToolService(bundleContext, new PostToolInfo());
     }

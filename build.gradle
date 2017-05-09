@@ -12,9 +12,10 @@ repositories {
 }
 
 dependencies {
-	compile('com.dotcms:dotcms:3.6.1') { transitive = true }
-	compile('commons-httpclient:commons-httpclient:3.1') {
+	compile('com.dotcms:dotcms:3.6.2')
+	compile('org.apache.httpcomponents:httpclient:4.5.3') { 
 		exclude(module: 'commons-logging')
+		exclude(module: 'slf4j-api')
 	}
 	provided('javax.servlet:servlet-api:2.5')
 }
@@ -38,10 +39,12 @@ jar {
 		instruction 'Bundle-Activator', 'com.aquent.viewtools.PostToolActivator'
 		instruction 'Import-Package', 
 			'!org.springframework.*', 
-			'!org.apache.commons.httpclient.*',
+			'!org.apache.http.*',
 			'org.apache.commons.logging',
+			'javax.net.ssl',
+ 			'javax.net',
 			'*;version=0'
-		instruction 'Embed-Dependency', 'commons-httpclient', 'httpcore', 'log4j', 'xercesImpl', 'xml-apis'
+		instruction 'Embed-Dependency', 'httpclient'
 		instruction 'Embed-Transitive', 'true'
 	}
 }
