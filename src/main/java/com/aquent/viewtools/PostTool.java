@@ -4,6 +4,7 @@ import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -117,7 +118,7 @@ public class PostTool implements ViewTool {
         m.setEntity(entity);
         try {
           CloseableHttpResponse r = client.execute(m);
-          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity()));
+          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity(), "UTF-8"));
         } catch (Exception e) {
           Logger.error(this, "Exception posting to url: " + url, e);
           return new PostToolResponse(ERR_CODE_UNKNOWN_ERR, null);
@@ -131,7 +132,7 @@ public class PostTool implements ViewTool {
         m.setEntity(entity);
         try {
           CloseableHttpResponse r = client.execute(m);
-          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity()));
+          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity(), "UTF-8"));
         } catch (Exception e) {
           Logger.error(this, "Exception posting to url: " + url, e);
           return new PostToolResponse(ERR_CODE_UNKNOWN_ERR, null);
@@ -245,7 +246,8 @@ public class PostTool implements ViewTool {
           urlParamsSB.append(appender + e.getKey() + "=" + e.getValue());
           appender = "&";
         }
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data, Charset.forName("UTF-8"));
+        
 
         CloseableHttpClient client;
 
@@ -259,29 +261,29 @@ public class PostTool implements ViewTool {
         } else {
           client = HttpClients.createDefault();
         }
-
+        
         if (method.equalsIgnoreCase(METHOD_POST)) {
           HttpPost m = new HttpPost(url);
           m.setEntity(entity);
           CloseableHttpResponse r = client.execute(m);
-          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity()));
+          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity(), "UTF-8"));
         } else if (method.equalsIgnoreCase(METHOD_PUT)) {
           HttpPut m = new HttpPut(url);
           m.setEntity(entity);
           CloseableHttpResponse r = client.execute(m);
-          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity()));
+          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity(), "UTF-8"));
         } else if (method.equalsIgnoreCase(METHOD_HEAD)) {
           HttpHead m = new HttpHead(url + urlParamsSB.toString());
           CloseableHttpResponse r = client.execute(m);
-          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity()));
+          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity(), "UTF-8"));
         } else if (method.equalsIgnoreCase(METHOD_DELETE)) {
           HttpDelete m = new HttpDelete(url + urlParamsSB.toString());
           CloseableHttpResponse r = client.execute(m);
-          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity()));
+          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity(), "UTF-8"));
         } else if (method.equalsIgnoreCase(METHOD_GET)) {
           HttpGet m = new HttpGet(url + urlParamsSB.toString());
           CloseableHttpResponse r = client.execute(m);
-          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity()));
+          return new PostToolResponse(r.getStatusLine().getStatusCode(), EntityUtils.toString(r.getEntity(), "UTF-8"));
         } else {
           Logger.error(this, "Unimplemented Method: " + method);
           return new PostToolResponse(ERR_CODE_UNIMPLEMENTED_METHOD, null);
