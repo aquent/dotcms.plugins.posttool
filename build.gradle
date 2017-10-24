@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-	compile('com.dotcms:dotcms:3.6.2')
+	compile('com.dotcms:dotcms:4.1.1')
 	compile('org.apache.httpcomponents:httpclient:4.5.3') { 
 		exclude(module: 'commons-logging')
 		exclude(module: 'slf4j-api')
@@ -40,7 +40,7 @@ jar {
 		instruction 'Import-Package', 
 			'!org.springframework.*', 
 			'!org.apache.http.*',
-			'org.apache.commons.logging',
+			'org.apache.commons.logging;version=0',
 			'javax.net.ssl',
  			'javax.net',
 			'*;version=0'

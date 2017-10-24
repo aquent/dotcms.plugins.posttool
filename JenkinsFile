@@ -1,0 +1,109 @@
+#!groovy
+
+def plugin = 'posttool'
+def devApp = 'dotcms-dev-app1a'
+def stagApp = 'dotcms-stag-app1a'
+def prodApp1 = 'dotcms-naw-app1a'
+def prodApp2 = 'dotcms-naw-app2a'
+
+def deployPath = '/data/wwwroot/dotcms/current/dotCMS/WEB-INF/felix/load'
+
+def GIT_BRANCH
+
+stage('Build') {
+  node {
+    checkout([$class: 'GitSCM',
+      branches: scm.branches,
+      doGenerateSubmoduleConfigurations: false,
+      extensions: [[$class: 'LocalBranch', localBranch: "**"]],
+      submoduleCfg: [],
+      userRemoteConfigs: [
+        [credentialsId: '92ca036f-9e54-41bf-a484-d3ab8555c6ae',
+        url: "git@github.com:aquent/dotcms.plugins.${plugin}.git"]]])
+    GIT_BRANCH = sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim()
+    slackSend "[${plugin} - ${GIT_BRANCH}] Build Started - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+    sh './gradlew clean jar'
+    archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
+    stash includes: 'build/libs/*.jar', name: "jar-${plugin}-${GIT_BRANCH}"
+    slackSend "[${plugin} - ${GIT_BRANCH}] Build Completed - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+  }
+}
+
+stage('Deploy Dev') {
+  node {
+    if (GIT_BRANCH == 'develop') {
+      slackSend "[${plugin} - ${GIT_BRANCH}] Dev Deploy Started - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+      sh 'rm build/libs/*.jar'
+      unstash "jar-${plugin}-${GIT_BRANCH}"
+      sh """
+        ssh dotcms@${devApp} rm -rf ${deployPath}/dotcms-plugins-${plugin}-*.jar
+        sleep 5
+        scp build/libs/*.jar dotcms@${devApp}:${deployPath}/.
+      """
+      slackSend "[${plugin} - ${GIT_BRANCH}] Dev Deploy Finished - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+    } else {
+      slackSend "[${plugin} - ${GIT_BRANCH}] Dev Deploy Skipped - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+    }
+  }
+}
+
+stage('Deploy Stag') {
+  if (GIT_BRANCH == 'develop') {
+    slackSend """
+      @here Ready to Promote Job to Stag?
+      [${plugin} - ${GIT_BRANCH}] ${env.JOB_NAME} # ${env.BUILD_NUMBER}
+      To proceed or abort please visit:
+      ${env.BUILD_URL}input/
+    """
+    input 'Promote to Stag?'
+
+    node {
+      slackSend "[${plugin} - ${GIT_BRANCH}] Stag Deploy Started - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+      ws("/usr/local/jenkins/workspace/${plugin}/stag") {
+        sh 'rm -f build/libs/*.jar'
+        unstash "jar-${plugin}-${GIT_BRANCH}"
+        sh """
+          ssh dotcms@${stagApp} rm -rf ${deployPath}/dotcms-plugins-${plugin}-*.jar
+          sleep 5
+          scp build/libs/*.jar dotcms@${stagApp}:${deployPath}/.
+        """
+      }
+      slackSend "[${plugin} - ${GIT_BRANCH}] Stag Deploy Finished - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+    }
+  } else {
+    slackSend "[${plugin} - ${GIT_BRANCH}] Stag Deploy Skipped - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+  }
+}
+
+stage('Deploy Prod') {
+  if (GIT_BRANCH == 'master') {
+    slackSend """
+      @here Ready to Promote Job to Production?
+      [${plugin} - ${GIT_BRANCH}] ${env.JOB_NAME} # ${env.BUILD_NUMBER}
+      To proceed or abort please visit:
+      ${env.BUILD_URL}input/
+    """
+    input 'Promote to Production?'
+
+    node {
+      slackSend "[${plugin} - ${GIT_BRANCH}] Prod Deploy Started - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+      ws("/usr/local/jenkins/workspace/${plugin}/prod") {
+        sh 'rm -f build/libs/*.jar'
+        unstash "jar-${plugin}-${GIT_BRANCH}"
+        sh """
+          ssh dotcms@${prodApp1} rm -rf ${deployPath}/dotcms-plugins-${plugin}-*.jar
+          sleep 5
+          scp build/libs/*.jar dotcms@${prodApp1}:${deployPath}/.
+        """
+        sh """
+          ssh dotcms@${prodApp2} rm -rf ${deployPath}/dotcms-plugins-${plugin}-*.jar
+          sleep 5
+          scp build/libs/*.jar dotcms@${prodApp2}:${deployPath}/.
+        """
+      }
+      slackSend "[${plugin} - ${GIT_BRANCH}] Prod Deploy Finished - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+    }
+  } else {
+    slackSend "[${plugin} - ${GIT_BRANCH}] Prod Deploy Skipped - ${env.JOB_NAME} # ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+  }
+}
