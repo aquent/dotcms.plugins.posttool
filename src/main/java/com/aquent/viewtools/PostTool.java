@@ -90,7 +90,7 @@ public class PostTool implements ViewTool {
    */
   public PostToolResponse sendStringData(String url, String data, String method, String contentType, Credentials creds) {
     Logger.debug(this, "sendStringData called with url=" + url + ", data=" + data + ", and method=" + method
-        + ", contentType = " + contentType + ", creds=" + UtilMethods.isSet(creds));
+        + ", contentType = " + contentType);
 
     StringEntity entity;
     try {
@@ -230,8 +230,8 @@ public class PostTool implements ViewTool {
    * @return A PostToolResponse Object
    */
   public PostToolResponse send(String url, Map<String, String> params, String method, String contentType, Credentials creds) {
-    Logger.debug(this, "send(Map) called with url=" + url + ", params=" + params + ", and method=" + method
-        + ", contentType = " + contentType + ", creds=" + UtilMethods.isSet(creds));
+    Logger.debug(this, "send(Map) called with url=" + url + ", and method=" + method
+        + ", contentType = " + contentType);
 
     if (inited) {
       try {
@@ -247,7 +247,7 @@ public class PostTool implements ViewTool {
           appender = "&";
         }
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data, Charset.forName("UTF-8"));
-        
+
 
         CloseableHttpClient client;
 
@@ -261,7 +261,7 @@ public class PostTool implements ViewTool {
         } else {
           client = HttpClients.createDefault();
         }
-        
+
         if (method.equalsIgnoreCase(METHOD_POST)) {
           HttpPost m = new HttpPost(url);
           m.setEntity(entity);
@@ -323,8 +323,8 @@ public class PostTool implements ViewTool {
    * @throws Exception from URLDecoder.decode
    */
   public PostToolResponse send(String url, String params, String method, String contentType, Credentials creds) throws Exception {
-    Logger.debug(this, "send(String) called with url=" + url + ", params=" + params + ", and method=" + method
-        + ", contentType = " + contentType + ", creds=" + UtilMethods.isSet(creds));
+    Logger.debug(this, "send(String) called with url=" + url + ", and method=" + method
+        + ", contentType = " + contentType);
 
     Map<String, String> queryPairs = new LinkedHashMap<String, String>();
     if (params.length() > 0) {
