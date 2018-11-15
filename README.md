@@ -18,8 +18,16 @@ Installation
 
 Compatibility
 -----
-DotCMS 3.1+
-For 2.3x+ compatibility see previous releases.
+DotCMS 5.0.2+
+
+Extra Exported Packages
+-----
+The following need added to the Exported Packages list if they are not already ...
+```
+org.apache.logging.log4j,
+org.apache.logging.log4j.core,
+org.apache.logging.log4j.spi
+```
 
 Usage
 -----
@@ -63,5 +71,4 @@ With Creds - You got: <textarea>$resp6.getResponse()</textarea> </p>
 
 Building
 --------
-* Install Gradle (if not already installed)
-* gradle jar 
+* Run: `./gradlew jar`

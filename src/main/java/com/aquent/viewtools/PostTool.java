@@ -1,8 +1,5 @@
 package com.aquent.viewtools;
 
-import com.dotmarketing.util.Logger;
-import com.dotmarketing.util.UtilMethods;
-
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -11,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.dotmarketing.util.Logger;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -43,7 +41,7 @@ public class PostTool implements ViewTool {
   private static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
   public static final int ERR_CODE_UNKNOWN_ERR = 888;
-  public static final int ERR_CODE_NOT_INTED = 999;
+  public static final int ERR_CODE_NOT_INITED = 999;
   public static final int ERR_CODE_UNIMPLEMENTED_METHOD = 777;
 
   public static final String METHOD_PUT = "PUT";
@@ -147,7 +145,7 @@ public class PostTool implements ViewTool {
       }
     }
 
-    return new PostToolResponse(ERR_CODE_NOT_INTED, null);
+    return new PostToolResponse(ERR_CODE_NOT_INITED, null);
   }
 
   /**
@@ -295,7 +293,7 @@ public class PostTool implements ViewTool {
       }
     }
 
-    return new PostToolResponse(ERR_CODE_NOT_INTED, null);
+    return new PostToolResponse(ERR_CODE_NOT_INITED, null);
   }
 
   /**

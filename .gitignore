@@ -4,8 +4,10 @@
 .checkstyle
 .classpath
 .gradle/
+.idea/
 .project
 .settings/
 build/resources/
 build/tmp/
+build/osgi-classes/
 .DS_Store

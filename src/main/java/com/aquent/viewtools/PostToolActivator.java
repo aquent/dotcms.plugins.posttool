@@ -1,10 +1,9 @@
 package com.aquent.viewtools;
 
-import com.dotcms.repackage.org.apache.logging.log4j.LogManager;
-import com.dotcms.repackage.org.apache.logging.log4j.core.LoggerContext;
 import com.dotmarketing.loggers.Log4jUtil;
 import com.dotmarketing.osgi.GenericBundleActivator;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -20,7 +19,7 @@ public class PostToolActivator extends GenericBundleActivator {
         // Setup Logger
         LoggerContext dotcmsLoggerContext = Log4jUtil.getLoggerContext();
         pluginLoggerContext = (LoggerContext) LogManager.getContext(this.getClass().getClassLoader(),
-            false, dotcmsLoggerContext, dotcmsLoggerContext.getConfigLocation());
+                                                                    false, dotcmsLoggerContext, dotcmsLoggerContext.getConfigLocation());
 
         //Initializing services...
         initializeServices(bundleContext);
