@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dotmarketing.util.Logger;
+import com.dotmarketing.util.UtilMethods;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -241,7 +242,7 @@ public class PostTool implements ViewTool {
         }
         for (Entry<String, String> e : params.entrySet()) {
           data.add(new BasicNameValuePair(e.getKey(), e.getValue()));
-          urlParamsSB.append(appender + e.getKey() + "=" + e.getValue());
+          urlParamsSB.append(appender + e.getKey() + "=" + UtilMethods.encodeURL(e.getValue()));
           appender = "&";
         }
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data, Charset.forName("UTF-8"));
