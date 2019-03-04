@@ -3,8 +3,8 @@
 def plugin = 'posttool'
 def devApp = 'dotcms-dev-app1a'
 def stagApp = 'dotcms-stag-app1a'
-def prodApp1 = 'dotcms-naw-app1a'
-def prodApp2 = 'dotcms-naw-app2a'
+def prodApp1 = 'dotcms-naw-app1b'
+def prodApp2 = 'dotcms-naw-app2b'
 
 def deployPath = '/data/wwwroot/dotcms/current/dotCMS/WEB-INF/felix/load'
 
