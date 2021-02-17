@@ -12,12 +12,11 @@ repositories {
 }
 
 dependencies {
-	compile('com.dotcms:dotcms:5.0.3')
+	compile('com.dotcms:dotcms:20.11.1')
 	compile('org.apache.httpcomponents:httpclient:4.5.3') { 
 		exclude(module: 'commons-logging')
 		exclude(module: 'slf4j-api')
 	}
-	provided('javax.servlet:servlet-api:2.5')
 }
 
 buildscript {
